@@ -277,6 +277,12 @@ document.getElementById("confirmarBtn").addEventListener("click", () => {
   msg += `%0AEndereço: ${endereco}`;
 
   window.open(`https://wa.me/5511982391638?text=${msg}`);
+
+  // LIMPAR CARRINHO
+  carrinho = [];
+  localStorage.removeItem('carrinho');
+  atualizarCarrinho();
+  document.getElementById("confirmarBox").style.display = "none";
 });
 
 // Cancelar confirmação
@@ -285,6 +291,13 @@ document.getElementById("cancelarBtn").onclick = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Recuperar carrinho do localStorage
+  const savedCarrinho = localStorage.getItem('carrinho');
+  if (savedCarrinho) {
+    carrinho = JSON.parse(savedCarrinho);
+    atualizarCarrinho();
+  }
+
   carregarCategorias();
 
   document.querySelector('nav').addEventListener('click', e => {
@@ -299,6 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = Object.values(MENU).flat().find(i => i.id === id);
       carrinho.push(item);
       atualizarCarrinho();
+
+      // SALVAR NO LOCALSTORAGE
+      localStorage.setItem('carrinho', JSON.stringify(carrinho));
     }
   });
 

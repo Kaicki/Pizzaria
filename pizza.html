@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizzaria Interativa</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Poppins, sans-serif;
+  background: linear-gradient(135deg,#0d0d0d,#1b1b1b);
+  color: #fff;
+}
+header {
+  text-align: center;
+  padding: 22px;
+  font-size: 30px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px);
+  font-weight: bold;
+}
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.08);
+  padding: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+nav button {
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  background: #ffcb3b;
+  font-weight: bold;
+  transition: .2s;
+}
+nav button:hover {
+  background: #ffd86a;
+  transform: scale(1.05);
+}
+section { padding: 20px; }
+h2 { margin-bottom: 15px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  padding: 15px;
+  border-radius: 20px;
+  backdrop-filter: blur(14px);
+  transition: .3s;
+}
+.card:hover {
+  transform: scale(1.05);
+  background: rgba(255,255,255,0.13);
+}
+.card img {
+  width: 100%;
+  height: 170px;
+  border-radius: 15px;
+  object-fit: cover;
+}
+.card button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 16px;
+  background: #ffcb3b;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .2s;
+}
+.card button:hover { background: #ffd86a; }
+
+#carrinhoBox {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 300px;
+  padding: 20px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  display: none;
+  backdrop-filter: blur(15px);
+  z-index: 40;
+}
+#carrinhoBox button {
+  padding: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  font-weight: bold;
+  background: #ffcb3b;
+  cursor: pointer;
+}
+
+#confirmarBox {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 300px;
+  padding: 20px;
+  background: rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.32);
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  display: none;
+  z-index: 50;
+}
+#confirmarBox input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  margin-top: 10px;
+}
+#confirmarBox button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 16px;
+  font-weight: bold;
+}
+#confirmarBtn { background: #25D366; }
+#cancelarBtn { background: #ff4d4d; color: #fff; }
+</style>
+</head>
+
+<body>
+
+<header>Pizzaria Interativa</header>
+
+<nav>
+  <button data-sec="salgadas">Salgadas</button>
+  <button data-sec="doces">Doces</button>
+  <button data-sec="bebidas">Bebidas</button>
+  <button id="btnCarrinho">🛒 Carrinho (<span id="qtd">0</span>)</button>
+</nav>
+
+<section id="salgadas" class="categoria">
+  <h2>Pizzas Salgadas</h2>
+  <div class="grid" id="lista-salgadas"></div>
+</section>
+
+<section id="doces" class="categoria" style="display:none;">
+  <h2>Pizzas Doces</h2>
+  <div class="grid" id="lista-doces"></div>
+</section>
+
+<section id="bebidas" class="categoria" style="display:none;">
+  <h2>Bebidas</h2>
+  <div class="grid" id="lista-bebidas"></div>
+</section>
+
+<div id="carrinhoBox"></div>
+
+<div id="confirmarBox">
+  <h3>Confirmar pedido</h3>
+  <p><strong>Total:</strong> R$ <span id="confirmTotal">0,00</span></p>
+  <input type="text" id="endereco" placeholder="Seu endereço">
+  <button id="confirmarBtn">Enviar pedido</button>
+  <button id="cancelarBtn">Cancelar</button>
+</div>
+
+<script>
+const MENU = {
+  salgadas: [
+    {id:1, nome:"Calabresa", preco:39.90, img:"https://via.placeholder.com/300x200"},
+    {id:2, nome:"Portuguesa", preco:42.90, img:"https://via.placeholder.com/300x200"}
+  ],
+  doces: [
+    {id:3, nome:"Chocolate", preco:45.90, img:"https://via.placeholder.com/300x200"},
+    {id:4, nome:"Prestígio", preco:47.90, img:"https://via.placeholder.com/300x200"}
+  ],
+  bebidas: [
+    {id:5, nome:"Coca-Cola", preco:6.00, img:"https://via.placeholder.com/300x200"},
+    {id:6, nome:"Chiton", preco:5.50, img:"https://via.placeholder.com/300x200"},
+    {id:7, nome:"Guaraná", preco:5.50, img:"https://via.placeholder.com/300x200"},
+    {id:8, nome:"Fanta", preco:5.50, img:"https://via.placeholder.com/300x200"},
+    {id:9, nome:"Sukita", preco:5.00, img:"https://via.placeholder.com/300x200"}
+  ]
+};
+
+let carrinho = [];
+
+// CARREGA AS CATEGORIAS
+function carregarCategorias() {
+  for (const cat in MENU) {
+    const area = document.getElementById(`lista-${cat}`);
+    MENU[cat].forEach(item => {
+      area.innerHTML += `
+        <div class="card">
+          <img src="${item.img}">
+          <h3>${item.nome}</h3>
+          <p>R$ ${item.preco.toFixed(2).replace('.', ',')}</p>
+          <button data-add="${item.id}">Adicionar</button>
+        </div>
+      `;
+    });
+  }
+}
+
+// Mostra seção
+function mudarSecao(sec) {
+  document.querySelectorAll('.categoria')
+    .forEach(c => c.style.display = 'none');
+
+  document.getElementById(sec).style.display = 'block';
+}
+
+// Atualiza contador
+function atualizarCarrinho() {
+  document.getElementById('qtd').textContent = carrinho.length;
+}
+
+// Abre carrinho
+function abrirCarrinho() {
+  const box = document.getElementById('carrinhoBox');
+  let total = 0;
+
+  let html = `<h3>Carrinho</h3>`;
+
+  if (carrinho.length === 0) {
+    html += `<p>Seu carrinho está vazio.</p>`;
+  } else {
+    carrinho.forEach(item => {
+      total += item.preco;
+      html += `<p>• ${item.nome} — R$ ${item.preco.toFixed(2).replace('.', ',')}</p>`;
+    });
+
+    html += `<hr><p><strong>Total: R$ ${total.toFixed(2).replace('.', ',')}</strong></p>`;
+    html += `<button id="btnFinalizar">Finalizar Pedido</button>`;
+  }
+
+  box.innerHTML = html;
+  box.style.display = "block";
+
+  // Finalizar pedido → abre confirmação
+  const finalizarBtn = document.getElementById("btnFinalizar");
+  if (finalizarBtn) {
+    finalizarBtn.onclick = () => abrirConfirmacao(total);
+  }
+}
+
+// Confirmação no canto
+function abrirConfirmacao(total) {
+  document.getElementById("confirmTotal").textContent = total.toFixed(2).replace('.', ',');
+  document.getElementById("confirmarBox").style.display = "block";
+}
+
+// Enviar pedido
+document.getElementById("confirmarBtn").addEventListener("click", () => {
+  const endereco = document.getElementById("endereco").value;
+  if (!endereco.trim()) return alert("Digite seu endereço!");
+
+  let msg = "Pedido:%0A";
+  let total = 0;
+
+  carrinho.forEach(i => {
+    total += i.preco;
+    msg += `• ${i.nome} - R$ ${i.preco.toFixed(2).replace('.', ',')}%0A`;
+  });
+
+  msg += `%0ATotal: R$ ${total.toFixed(2).replace('.', ',')}`;
+  msg += `%0AEndereço: ${endereco}`;
+
+  window.open(`https://wa.me/5511982391638?text=${msg}`);
+});
+
+// Cancelar confirmação
+document.getElementById("cancelarBtn").onclick = () => {
+  document.getElementById("confirmarBox").style.display = "none";
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  carregarCategorias();
+
+  document.querySelector('nav').addEventListener('click', e => {
+    if (e.target.tagName === "BUTTON" && e.target.dataset.sec) {
+      mudarSecao(e.target.dataset.sec);
+    }
+  });
+
+  document.body.addEventListener('click', e => {
+    if (e.target.dataset.add) {
+      const id = Number(e.target.dataset.add);
+      const item = Object.values(MENU).flat().find(i => i.id === id);
+      carrinho.push(item);
+      atualizarCarrinho();
+    }
+  });
+
+  document.getElementById("btnCarrinho").onclick = abrirCarrinho;
+});
+</script>
+
+</body>
+</html>
